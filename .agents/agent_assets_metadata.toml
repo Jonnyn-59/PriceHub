@@ -1,0 +1,14 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "UYIBGsNGMuZ0qz1MW24pA"
+uri = "file://artifacts/pricehub/src/assets/logo.png"
+type = "image"
+title = "PriceHub geometric logo mark"
+
+[[generated]]
+id = "ewtQTiTPU9YFGv1z0TMZ7"
+uri = "file://artifacts/pricehub/src/assets/hero-bg.png"
+type = "image"
+title = "Dark trading terminal hero background"

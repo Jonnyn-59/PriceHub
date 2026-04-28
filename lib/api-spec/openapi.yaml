@@ -3,34 +3,1089 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: PriceHub API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: auth
+  - name: products
+  - name: marketplace
+  - name: analytics
+  - name: news
+  - name: chats
+  - name: subscription
+  - name: settings
+  - name: admin
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
           content:
             application/json:
+              schema: { $ref: "#/components/schemas/HealthStatus" }
+
+  /auth/register:
+    post:
+      operationId: registerUser
+      tags: [auth]
+      summary: Register a new Hub ID account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegisterBody" }
+      responses:
+        "200":
+          description: Registered
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthSession" }
+  /auth/login:
+    post:
+      operationId: loginUser
+      tags: [auth]
+      summary: Login with Hub ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginBody" }
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthSession" }
+  /auth/logout:
+    post:
+      operationId: logoutUser
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get the current logged in user
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthSession" }
+
+  /products:
+    get:
+      operationId: listMyProducts
+      tags: [products]
+      summary: List the current seller's products
+      responses:
+        "200":
+          description: Products
+          content:
+            application/json:
               schema:
-                $ref: "#/components/schemas/HealthStatus"
+                type: array
+                items: { $ref: "#/components/schemas/Product" }
+    post:
+      operationId: createProduct
+      tags: [products]
+      summary: Create a product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProductCreate" }
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Product" }
+  /products/{id}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Product
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Product" }
+    patch:
+      operationId: updateProduct
+      tags: [products]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProductUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Product" }
+    delete:
+      operationId: deleteProduct
+      tags: [products]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+
+  /marketplace/search:
+    get:
+      operationId: searchMarketplace
+      tags: [marketplace]
+      summary: Search products and compare prices across Russian marketplaces
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema: { type: string }
+        - name: category
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: Listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/MarketplaceListing" }
+  /marketplace/featured:
+    get:
+      operationId: getFeaturedDeals
+      tags: [marketplace]
+      summary: Top deals across marketplaces (biggest savings)
+      responses:
+        "200":
+          description: Deals
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/MarketplaceListing" }
+  /marketplace/listings/{id}:
+    get:
+      operationId: getListing
+      tags: [marketplace]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Listing
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MarketplaceListing" }
+
+  /analytics/sales:
+    get:
+      operationId: getSalesAnalytics
+      tags: [analytics]
+      summary: Daily sales/revenue/profit series for current seller
+      responses:
+        "200":
+          description: Sales series
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SalesAnalytics" }
+  /analytics/summary:
+    get:
+      operationId: getSellerSummary
+      tags: [analytics]
+      summary: KPI summary for the seller dashboard
+      responses:
+        "200":
+          description: Summary
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SellerSummary" }
+  /analytics/ai-insights:
+    get:
+      operationId: getAiInsights
+      tags: [analytics]
+      summary: AI-generated insights for yesterday and today
+      responses:
+        "200":
+          description: AI insights
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AiInsightsResponse" }
+
+  /news:
+    get:
+      operationId: listNews
+      tags: [news]
+      summary: Market news feed
+      responses:
+        "200":
+          description: News
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/NewsItem" }
+
+  /chats:
+    get:
+      operationId: listChats
+      tags: [chats]
+      responses:
+        "200":
+          description: Chats
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ChatThread" }
+    post:
+      operationId: createChat
+      tags: [chats]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ChatCreate" }
+      responses:
+        "200":
+          description: Chat
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ChatThread" }
+  /chats/{id}/messages:
+    get:
+      operationId: listChatMessages
+      tags: [chats]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ChatMessage" }
+    post:
+      operationId: sendChatMessage
+      tags: [chats]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SendMessageBody" }
+      responses:
+        "200":
+          description: Sent
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ChatMessage" }
+  /chats/contacts:
+    get:
+      operationId: listChatContacts
+      tags: [chats]
+      summary: List of users available to start a chat with
+      responses:
+        "200":
+          description: Contacts
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ContactUser" }
+
+  /subscription/plans:
+    get:
+      operationId: listSubscriptionPlans
+      tags: [subscription]
+      responses:
+        "200":
+          description: Plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SubscriptionPlan" }
+  /subscription/me:
+    get:
+      operationId: getMySubscription
+      tags: [subscription]
+      responses:
+        "200":
+          description: Subscription
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UserSubscription" }
+  /subscription/subscribe:
+    post:
+      operationId: subscribeToPlan
+      tags: [subscription]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SubscribeBody" }
+      responses:
+        "200":
+          description: Subscribed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UserSubscription" }
+
+  /settings/profile:
+    get:
+      operationId: getProfileSettings
+      tags: [settings]
+      responses:
+        "200":
+          description: Profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProfileSettings" }
+    patch:
+      operationId: updateProfileSettings
+      tags: [settings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateProfileBody" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProfileSettings" }
+  /settings/preferences:
+    get:
+      operationId: getPreferences
+      tags: [settings]
+      responses:
+        "200":
+          description: Preferences
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Preferences" }
+    patch:
+      operationId: updatePreferences
+      tags: [settings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PreferencesUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Preferences" }
+
+  /admin/users:
+    get:
+      operationId: adminListUsers
+      tags: [admin]
+      responses:
+        "200":
+          description: Users
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdminUser" }
+  /admin/users/{id}:
+    patch:
+      operationId: adminUpdateUser
+      tags: [admin]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminUserUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminUser" }
+    delete:
+      operationId: adminDeleteUser
+      tags: [admin]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+  /admin/products:
+    get:
+      operationId: adminListProducts
+      tags: [admin]
+      responses:
+        "200":
+          description: Products
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdminProduct" }
+  /admin/products/{id}:
+    patch:
+      operationId: adminUpdateProduct
+      tags: [admin]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProductUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminProduct" }
+    delete:
+      operationId: adminDeleteProduct
+      tags: [admin]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+  /admin/devs:
+    get:
+      operationId: adminListDevelopers
+      tags: [admin]
+      responses:
+        "200":
+          description: Developer accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AdminUser" }
+    post:
+      operationId: adminCreateDeveloper
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateDeveloperBody" }
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminUser" }
+  /admin/devs/{id}/permissions:
+    patch:
+      operationId: adminUpdateDevPermissions
+      tags: [admin]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdatePermissionsBody" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminUser" }
+  /admin/console:
+    get:
+      operationId: adminGetConsole
+      tags: [admin]
+      summary: Live service console — recent service events and user activity
+      responses:
+        "200":
+          description: Console
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ConsoleEntry" }
+  /admin/audit:
+    get:
+      operationId: adminGetAuditLog
+      tags: [admin]
+      summary: Audit history of seller and user actions
+      responses:
+        "200":
+          description: Audit log
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AuditEntry" }
+  /admin/server/restart:
+    post:
+      operationId: adminRestartServer
+      tags: [admin]
+      summary: Restart a service node
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RestartBody" }
+      responses:
+        "200":
+          description: Restarted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+  /admin/server/nodes:
+    get:
+      operationId: adminListNodes
+      tags: [admin]
+      summary: Service nodes status
+      responses:
+        "200":
+          description: Nodes
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ServerNode" }
+  /admin/code:
+    get:
+      operationId: adminListCodeFiles
+      tags: [admin]
+      summary: List of code files available to the dev
+      responses:
+        "200":
+          description: Files
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/CodeFile" }
+    patch:
+      operationId: adminUpdateCodeFile
+      tags: [admin]
+      summary: Save changes to a code file
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateCodeFileBody" }
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CodeFile" }
+  /admin/seller-history/{id}:
+    get:
+      operationId: adminGetSellerHistory
+      tags: [admin]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Seller history
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SellerHistory" }
+
 components:
   schemas:
     HealthStatus:
       type: object
       properties:
-        status:
-          type: string
-      required:
-        - status
+        status: { type: string }
+      required: [status]
+    OkResponse:
+      type: object
+      properties:
+        ok: { type: boolean }
+      required: [ok]
 
+    Role:
+      type: string
+      enum: [buyer, seller, developer, support]
+
+    RegisterBody:
+      type: object
+      required: [hubId, password, displayName, role]
+      properties:
+        hubId: { type: string }
+        password: { type: string }
+        displayName: { type: string }
+        email: { type: string }
+        role:
+          type: string
+          enum: [buyer, seller]
+    LoginBody:
+      type: object
+      required: [hubId, password]
+      properties:
+        hubId: { type: string }
+        password: { type: string }
+
+    AuthSession:
+      type: object
+      required: [user]
+      properties:
+        user: { $ref: "#/components/schemas/User" }
+    User:
+      type: object
+      required: [id, hubId, displayName, role, createdAt, banned, permissions, subscriptionTier]
+      properties:
+        id: { type: integer }
+        hubId: { type: string }
+        displayName: { type: string }
+        email: { type: ["string", "null"] }
+        role: { $ref: "#/components/schemas/Role" }
+        avatarUrl: { type: ["string", "null"] }
+        banned: { type: boolean }
+        subscriptionTier: { type: string }
+        createdAt: { type: string, format: date-time }
+        permissions:
+          type: array
+          items: { type: string }
+
+    Product:
+      type: object
+      required: [id, sellerId, name, price, cost, marketplace, currency, stock, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        sellerId: { type: integer }
+        name: { type: string }
+        description: { type: ["string", "null"] }
+        price: { type: number }
+        cost: { type: number }
+        currency: { type: string }
+        marketplace: { type: string }
+        category: { type: ["string", "null"] }
+        imageUrl: { type: ["string", "null"] }
+        externalUrl: { type: ["string", "null"] }
+        stock: { type: integer }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ProductCreate:
+      type: object
+      required: [name, price, cost, marketplace]
+      properties:
+        name: { type: string }
+        description: { type: string }
+        price: { type: number }
+        cost: { type: number }
+        currency: { type: string }
+        marketplace: { type: string }
+        category: { type: string }
+        imageUrl: { type: string }
+        externalUrl: { type: string }
+        stock: { type: integer }
+    ProductUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        description: { type: string }
+        price: { type: number }
+        cost: { type: number }
+        currency: { type: string }
+        marketplace: { type: string }
+        category: { type: string }
+        imageUrl: { type: string }
+        externalUrl: { type: string }
+        stock: { type: integer }
+
+    MarketplaceOffer:
+      type: object
+      required: [marketplace, price, url, inStock]
+      properties:
+        marketplace: { type: string }
+        price: { type: number }
+        url: { type: string }
+        inStock: { type: boolean }
+        deliveryDays: { type: integer }
+        rating: { type: number }
+    MarketplaceListing:
+      type: object
+      required: [id, name, category, imageUrl, lowestPrice, highestPrice, currency, offers]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        brand: { type: ["string", "null"] }
+        description: { type: ["string", "null"] }
+        category: { type: string }
+        imageUrl: { type: string }
+        currency: { type: string }
+        lowestPrice: { type: number }
+        highestPrice: { type: number }
+        savingsPercent: { type: number }
+        offers:
+          type: array
+          items: { $ref: "#/components/schemas/MarketplaceOffer" }
+
+    SalesPoint:
+      type: object
+      required: [date, units, revenue, profit]
+      properties:
+        date: { type: string }
+        units: { type: integer }
+        revenue: { type: number }
+        profit: { type: number }
+    SalesAnalytics:
+      type: object
+      required: [series, marketplaceBreakdown]
+      properties:
+        series:
+          type: array
+          items: { $ref: "#/components/schemas/SalesPoint" }
+        marketplaceBreakdown:
+          type: array
+          items:
+            type: object
+            required: [marketplace, revenue, units]
+            properties:
+              marketplace: { type: string }
+              revenue: { type: number }
+              units: { type: integer }
+    SellerSummary:
+      type: object
+      required: [revenueToday, revenueYesterday, profitToday, profitYesterday, unitsToday, unitsYesterday, productCount, conversionRate]
+      properties:
+        revenueToday: { type: number }
+        revenueYesterday: { type: number }
+        profitToday: { type: number }
+        profitYesterday: { type: number }
+        unitsToday: { type: integer }
+        unitsYesterday: { type: integer }
+        productCount: { type: integer }
+        conversionRate: { type: number }
+    AiInsight:
+      type: object
+      required: [period, headline, summary, recommendations, generatedAt]
+      properties:
+        period: { type: string }
+        headline: { type: string }
+        summary: { type: string }
+        sentiment: { type: string }
+        recommendations:
+          type: array
+          items: { type: string }
+        generatedAt: { type: string, format: date-time }
+    AiInsightsResponse:
+      type: object
+      required: [yesterday, today]
+      properties:
+        yesterday: { $ref: "#/components/schemas/AiInsight" }
+        today: { $ref: "#/components/schemas/AiInsight" }
+
+    NewsItem:
+      type: object
+      required: [id, title, summary, source, category, publishedAt]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        summary: { type: string }
+        source: { type: string }
+        category: { type: string }
+        url: { type: ["string", "null"] }
+        imageUrl: { type: ["string", "null"] }
+        publishedAt: { type: string, format: date-time }
+
+    ContactUser:
+      type: object
+      required: [id, hubId, displayName, role]
+      properties:
+        id: { type: integer }
+        hubId: { type: string }
+        displayName: { type: string }
+        role: { $ref: "#/components/schemas/Role" }
+        avatarUrl: { type: ["string", "null"] }
+    ChatThread:
+      type: object
+      required: [id, otherUser, lastMessageAt, unread]
+      properties:
+        id: { type: integer }
+        otherUser: { $ref: "#/components/schemas/ContactUser" }
+        lastMessage: { type: ["string", "null"] }
+        lastMessageAt: { type: string, format: date-time }
+        unread: { type: integer }
+    ChatMessage:
+      type: object
+      required: [id, chatId, senderId, content, sentAt]
+      properties:
+        id: { type: integer }
+        chatId: { type: integer }
+        senderId: { type: integer }
+        senderName: { type: string }
+        content: { type: string }
+        sentAt: { type: string, format: date-time }
+    ChatCreate:
+      type: object
+      required: [otherUserId]
+      properties:
+        otherUserId: { type: integer }
+    SendMessageBody:
+      type: object
+      required: [content]
+      properties:
+        content: { type: string }
+
+    SubscriptionPlan:
+      type: object
+      required: [id, name, priceMonthly, currency, features, audience]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        priceMonthly: { type: number }
+        currency: { type: string }
+        audience: { type: string }
+        tagline: { type: string }
+        features:
+          type: array
+          items: { type: string }
+    UserSubscription:
+      type: object
+      required: [planId, status, renewsAt]
+      properties:
+        planId: { type: string }
+        status: { type: string }
+        renewsAt: { type: string, format: date-time }
+    SubscribeBody:
+      type: object
+      required: [planId]
+      properties:
+        planId: { type: string }
+
+    ProfileSettings:
+      type: object
+      required: [hubId, displayName]
+      properties:
+        hubId: { type: string }
+        displayName: { type: string }
+        email: { type: ["string", "null"] }
+        bio: { type: ["string", "null"] }
+        avatarUrl: { type: ["string", "null"] }
+        company: { type: ["string", "null"] }
+    UpdateProfileBody:
+      type: object
+      properties:
+        displayName: { type: string }
+        email: { type: string }
+        bio: { type: string }
+        avatarUrl: { type: string }
+        company: { type: string }
+    Preferences:
+      type: object
+      required: [theme, accent, density, language, notifications]
+      properties:
+        theme: { type: string }
+        accent: { type: string }
+        density: { type: string }
+        language: { type: string }
+        notifications: { type: boolean }
+    PreferencesUpdate:
+      type: object
+      properties:
+        theme: { type: string }
+        accent: { type: string }
+        density: { type: string }
+        language: { type: string }
+        notifications: { type: boolean }
+
+    AdminUser:
+      type: object
+      required: [id, hubId, displayName, role, banned, permissions, productCount, lastActiveAt, createdAt]
+      properties:
+        id: { type: integer }
+        hubId: { type: string }
+        displayName: { type: string }
+        email: { type: ["string", "null"] }
+        role: { $ref: "#/components/schemas/Role" }
+        banned: { type: boolean }
+        subscriptionTier: { type: string }
+        productCount: { type: integer }
+        lastActiveAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        permissions:
+          type: array
+          items: { type: string }
+    AdminUserUpdate:
+      type: object
+      properties:
+        displayName: { type: string }
+        email: { type: string }
+        role: { $ref: "#/components/schemas/Role" }
+        banned: { type: boolean }
+        subscriptionTier: { type: string }
+    AdminProduct:
+      type: object
+      required: [id, name, sellerId, sellerName, price, cost, marketplace, currency, stock, createdAt]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        sellerId: { type: integer }
+        sellerName: { type: string }
+        price: { type: number }
+        cost: { type: number }
+        currency: { type: string }
+        marketplace: { type: string }
+        category: { type: ["string", "null"] }
+        imageUrl: { type: ["string", "null"] }
+        stock: { type: integer }
+        createdAt: { type: string, format: date-time }
+    CreateDeveloperBody:
+      type: object
+      required: [hubId, password, displayName, permissions]
+      properties:
+        hubId: { type: string }
+        password: { type: string }
+        displayName: { type: string }
+        email: { type: string }
+        role:
+          type: string
+          enum: [developer, support]
+        permissions:
+          type: array
+          items: { type: string }
+    UpdatePermissionsBody:
+      type: object
+      required: [permissions]
+      properties:
+        permissions:
+          type: array
+          items: { type: string }
+    ConsoleEntry:
+      type: object
+      required: [id, level, source, message, createdAt]
+      properties:
+        id: { type: integer }
+        level: { type: string }
+        source: { type: string }
+        message: { type: string }
+        createdAt: { type: string, format: date-time }
+    AuditEntry:
+      type: object
+      required: [id, actorId, actorName, actorRole, action, target, createdAt]
+      properties:
+        id: { type: integer }
+        actorId: { type: integer }
+        actorName: { type: string }
+        actorRole: { type: string }
+        action: { type: string }
+        target: { type: string }
+        details: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+    ServerNode:
+      type: object
+      required: [id, name, region, status, cpu, memory, uptimeHours]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        region: { type: string }
+        status: { type: string }
+        cpu: { type: number }
+        memory: { type: number }
+        uptimeHours: { type: number }
+    RestartBody:
+      type: object
+      required: [nodeId]
+      properties:
+        nodeId: { type: string }
+    CodeFile:
+      type: object
+      required: [path, language, content, updatedAt]
+      properties:
+        path: { type: string }
+        language: { type: string }
+        content: { type: string }
+        updatedAt: { type: string, format: date-time }
+    UpdateCodeFileBody:
+      type: object
+      required: [path, content]
+      properties:
+        path: { type: string }
+        content: { type: string }
+    SellerHistory:
+      type: object
+      required: [seller, products, recentActions, salesSeries]
+      properties:
+        seller: { $ref: "#/components/schemas/AdminUser" }
+        products:
+          type: array
+          items: { $ref: "#/components/schemas/AdminProduct" }
+        recentActions:
+          type: array
+          items: { $ref: "#/components/schemas/AuditEntry" }
+        salesSeries:
+          type: array
+          items: { $ref: "#/components/schemas/SalesPoint" }
