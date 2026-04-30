@@ -91,7 +91,7 @@ export default function Settings() {
         toast.success("Настройки внешнего вида сохранены");
         
         // Apply theme immediately
-        const isDark = data.theme === 'dark' || (data.theme === 'system' && window.matchMatchMedia?.('(prefers-color-scheme: dark)').matches);
+        const isDark = data.theme === 'dark' || (data.theme === 'system' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
         document.documentElement.classList.toggle('dark', isDark);
         
         // Custom hack to map accent to primary var

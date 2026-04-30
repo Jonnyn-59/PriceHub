@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
-import { 
-  Search, 
-  BarChart2, 
-  Package, 
-  MessageSquare, 
-  Newspaper, 
-  CreditCard, 
+import {
+  Search,
+  BarChart2,
+  Package,
+  MessageSquare,
+  Newspaper,
+  CreditCard,
   Settings,
   LogOut,
   Users,
@@ -18,7 +18,9 @@ import {
   Code,
   Tag,
   Menu,
-  Bell
+  Bell,
+  TrendingUp,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -34,8 +36,10 @@ interface NavItem {
 const navItems: NavItem[] = [
   { title: "Поиск", href: "/search", icon: Search, roles: ["buyer", "developer", "support"] },
   { title: "Акции", href: "/deals", icon: Tag, roles: ["buyer", "developer", "support"] },
+  { title: "Моя экономия", href: "/analytics", icon: TrendingUp, roles: ["buyer", "developer", "support"] },
   { title: "Аналитика", href: "/dashboard", icon: BarChart2, roles: ["seller", "developer", "support"] },
   { title: "Мои товары", href: "/products", icon: Package, roles: ["seller", "developer", "support"] },
+  { title: "Сотрудники", href: "/staff", icon: UserPlus, roles: ["seller", "developer", "support"] },
   { title: "Сообщения", href: "/chats", icon: MessageSquare, roles: ["buyer", "seller", "developer", "support"] },
   { title: "Новости", href: "/news", icon: Newspaper, roles: ["buyer", "seller", "developer", "support"] },
   { title: "Подписка", href: "/subscription", icon: CreditCard, roles: ["buyer", "seller", "developer", "support"] },
@@ -43,9 +47,9 @@ const navItems: NavItem[] = [
   { title: "Пользователи", href: "/admin/users", icon: Users, roles: ["developer", "support"] },
   { title: "Все товары", href: "/admin/products", icon: Package, roles: ["developer", "support"] },
   { title: "Разработчики", href: "/admin/devs", icon: Code, roles: ["developer"] },
-  { title: "Консоль", href: "/admin/console", icon: Terminal, roles: ["developer", "support"] },
+  { title: "Консоль", href: "/admin/console", icon: Terminal, roles: ["developer"] },
   { title: "Аудит", href: "/admin/audit", icon: Activity, roles: ["developer", "support"] },
-  { title: "Серверы", href: "/admin/servers", icon: Server, roles: ["developer", "support"] },
+  { title: "Серверы", href: "/admin/servers", icon: Server, roles: ["developer"] },
   { title: "Код", href: "/admin/code", icon: Code, roles: ["developer"] },
 ];
 

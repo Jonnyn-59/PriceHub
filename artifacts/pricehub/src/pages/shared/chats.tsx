@@ -26,14 +26,14 @@ export default function Chats() {
   const [isNewChatOpen, setIsNewChatOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { data: chats, isLoading: chatsLoading } = useListChats({ query: { refetchInterval: 10000 } });
-  const { data: messages, isLoading: msgsLoading } = useListChatMessages(activeChatId!, { 
-    query: { enabled: !!activeChatId, refetchInterval: 5000 } 
+  const { data: chats, isLoading: chatsLoading } = useListChats({ query: { refetchInterval: 10000 } as never });
+  const { data: messages, isLoading: msgsLoading } = useListChatMessages(activeChatId!, {
+    query: { enabled: !!activeChatId, refetchInterval: 5000 } as never,
   });
   const sendMessage = useSendChatMessage();
-  
+
   // Contacts logic
-  const { data: contacts } = useListChatContacts({ query: { enabled: isNewChatOpen } });
+  const { data: contacts } = useListChatContacts({ query: { enabled: isNewChatOpen } as never });
   const createChat = useCreateChat();
 
   useEffect(() => {

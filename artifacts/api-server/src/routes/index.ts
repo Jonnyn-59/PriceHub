@@ -9,6 +9,8 @@ import chatsRouter from "./chats";
 import subscriptionRouter from "./subscription";
 import settingsRouter from "./settings";
 import adminRouter from "./admin";
+import sellerRouter from "./seller";
+import buyerRouter from "./buyer";
 
 const router: IRouter = Router();
 
@@ -22,5 +24,7 @@ router.use(chatsRouter);
 router.use(subscriptionRouter);
 router.use(settingsRouter);
 router.use(adminRouter);
+router.use(sellerRouter);
+router.use(buyerRouter);
 
 export default router;

@@ -1,5 +1,6 @@
 import { useGetSellerSummary, useGetSalesAnalytics, useGetAiInsights, useListNews } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Loader2, TrendingUp, TrendingDown, DollarSign, Package, Lightbulb, Activity, ArrowRight } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, Cell } from "recharts";
 import { Link } from "wouter";

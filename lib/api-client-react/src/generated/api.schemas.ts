@@ -389,11 +389,104 @@ export interface UpdateCodeFileBody {
   content: string;
 }
 
+export type SellerHistoryTotals = {
+  revenue30d: number;
+  profit30d: number;
+  orders30d: number;
+  products: number;
+};
+
 export interface SellerHistory {
   seller: AdminUser;
   products: AdminProduct[];
-  recentActions: AuditEntry[];
+  actions: AuditEntry[];
   salesSeries: SalesPoint[];
+  totals: SellerHistoryTotals;
+}
+
+export interface StaffMember {
+  id: number;
+  hubId: string;
+  displayName: string;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  jobTitle: string | null;
+  role: string;
+  createdAt: string;
+  lastActiveAt?: string;
+}
+
+export interface CreateStaffBody {
+  hubId: string;
+  password: string;
+  displayName: string;
+  email?: string;
+  jobTitle: string;
+}
+
+export type PriceHistoryPointsItem = {
+  date: string;
+  price: number;
+  marketplace: string;
+};
+
+export interface PriceHistory {
+  listingId: number;
+  name: string;
+  currency: string;
+  points: PriceHistoryPointsItem[];
+}
+
+export type BuyerSavingsSummaryTotals = {
+  trackedItems: number;
+  totalSavings: number;
+  avgSavingsPercent: number;
+  viewedItems: number;
+};
+
+export type BuyerSavingsSummarySavingsByMarketplaceItem = {
+  marketplace: string;
+  savings: number;
+  deals: number;
+};
+
+export interface BuyerSavingsSummary {
+  totals: BuyerSavingsSummaryTotals;
+  savingsByMarketplace: BuyerSavingsSummarySavingsByMarketplaceItem[];
+  recentDeals: MarketplaceListing[];
+}
+
+export type AdminOverviewTotals = {
+  users: number;
+  sellers: number;
+  buyers: number;
+  products: number;
+  listings: number;
+  activeSubs: number;
+  mrr: number;
+};
+
+export type AdminOverviewDailySignupsItem = {
+  date: string;
+  count: number;
+};
+
+export type AdminOverviewRoleBreakdownItem = {
+  role: string;
+  count: number;
+};
+
+export type AdminOverviewRevenueSeriesItem = {
+  date: string;
+  revenue: number;
+};
+
+export interface AdminOverview {
+  totals: AdminOverviewTotals;
+  dailySignups: AdminOverviewDailySignupsItem[];
+  roleBreakdown: AdminOverviewRoleBreakdownItem[];
+  revenueSeries: AdminOverviewRevenueSeriesItem[];
 }
 
 export type SearchMarketplaceParams = {

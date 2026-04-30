@@ -9,10 +9,12 @@ import type { AdminProduct } from "./adminProduct";
 import type { AdminUser } from "./adminUser";
 import type { AuditEntry } from "./auditEntry";
 import type { SalesPoint } from "./salesPoint";
+import type { SellerHistoryTotals } from "./sellerHistoryTotals";
 
 export interface SellerHistory {
   seller: AdminUser;
   products: AdminProduct[];
-  recentActions: AuditEntry[];
+  actions: AuditEntry[];
   salesSeries: SalesPoint[];
+  totals: SellerHistoryTotals;
 }

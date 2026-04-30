@@ -14,7 +14,7 @@ export default function Search() {
   const { data: results, isLoading } = useSearchMarketplace({
     q: query,
     category: activeCategory || undefined,
-  }, { query: { enabled: true } });
+  }, { query: { enabled: true } as never });
 
   const categories = ["Электроника", "Бытовая техника", "Одежда", "Дом"];
 

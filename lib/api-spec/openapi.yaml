@@ -662,6 +662,85 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/SellerHistory" }
 
+  /seller/staff:
+    get:
+      operationId: listSellerStaff
+      tags: [seller]
+      responses:
+        "200":
+          description: List of staff
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/StaffMember" }
+    post:
+      operationId: createSellerStaff
+      tags: [seller]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateStaffBody" }
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaffMember" }
+  /seller/staff/{id}:
+    delete:
+      operationId: deleteSellerStaff
+      tags: [seller]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OkResponse" }
+
+  /buyer/price-history/{id}:
+    get:
+      operationId: getBuyerPriceHistory
+      tags: [buyer]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Price history series
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PriceHistory" }
+  /buyer/savings-summary:
+    get:
+      operationId: getBuyerSavingsSummary
+      tags: [buyer]
+      responses:
+        "200":
+          description: Buyer savings dashboard
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BuyerSavingsSummary" }
+
+  /admin/overview:
+    get:
+      operationId: adminGetOverview
+      tags: [admin]
+      responses:
+        "200":
+          description: Admin platform overview
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminOverview" }
+
 components:
   schemas:
     HealthStatus:
@@ -1077,15 +1156,127 @@ components:
         content: { type: string }
     SellerHistory:
       type: object
-      required: [seller, products, recentActions, salesSeries]
+      required: [seller, products, actions, salesSeries, totals]
       properties:
         seller: { $ref: "#/components/schemas/AdminUser" }
         products:
           type: array
           items: { $ref: "#/components/schemas/AdminProduct" }
-        recentActions:
+        actions:
           type: array
           items: { $ref: "#/components/schemas/AuditEntry" }
         salesSeries:
           type: array
           items: { $ref: "#/components/schemas/SalesPoint" }
+        totals:
+          type: object
+          required: [revenue30d, profit30d, orders30d, products]
+          properties:
+            revenue30d: { type: number }
+            profit30d: { type: number }
+            orders30d: { type: integer }
+            products: { type: integer }
+
+    StaffMember:
+      type: object
+      required: [id, hubId, displayName, role, jobTitle, createdAt]
+      properties:
+        id: { type: integer }
+        hubId: { type: string }
+        displayName: { type: string }
+        email: { type: ["string", "null"] }
+        jobTitle: { type: ["string", "null"] }
+        role: { type: string }
+        createdAt: { type: string, format: date-time }
+        lastActiveAt: { type: string, format: date-time }
+    CreateStaffBody:
+      type: object
+      required: [hubId, password, displayName, jobTitle]
+      properties:
+        hubId: { type: string }
+        password: { type: string }
+        displayName: { type: string }
+        email: { type: string }
+        jobTitle: { type: string }
+
+    PriceHistory:
+      type: object
+      required: [listingId, name, currency, points]
+      properties:
+        listingId: { type: integer }
+        name: { type: string }
+        currency: { type: string }
+        points:
+          type: array
+          items:
+            type: object
+            required: [date, price, marketplace]
+            properties:
+              date: { type: string }
+              price: { type: number }
+              marketplace: { type: string }
+
+    BuyerSavingsSummary:
+      type: object
+      required: [totals, savingsByMarketplace, recentDeals]
+      properties:
+        totals:
+          type: object
+          required: [trackedItems, totalSavings, avgSavingsPercent, viewedItems]
+          properties:
+            trackedItems: { type: integer }
+            totalSavings: { type: number }
+            avgSavingsPercent: { type: number }
+            viewedItems: { type: integer }
+        savingsByMarketplace:
+          type: array
+          items:
+            type: object
+            required: [marketplace, savings, deals]
+            properties:
+              marketplace: { type: string }
+              savings: { type: number }
+              deals: { type: integer }
+        recentDeals:
+          type: array
+          items: { $ref: "#/components/schemas/MarketplaceListing" }
+
+    AdminOverview:
+      type: object
+      required: [totals, dailySignups, roleBreakdown, revenueSeries]
+      properties:
+        totals:
+          type: object
+          required: [users, sellers, buyers, products, listings, activeSubs, mrr]
+          properties:
+            users: { type: integer }
+            sellers: { type: integer }
+            buyers: { type: integer }
+            products: { type: integer }
+            listings: { type: integer }
+            activeSubs: { type: integer }
+            mrr: { type: number }
+        dailySignups:
+          type: array
+          items:
+            type: object
+            required: [date, count]
+            properties:
+              date: { type: string }
+              count: { type: integer }
+        roleBreakdown:
+          type: array
+          items:
+            type: object
+            required: [role, count]
+            properties:
+              role: { type: string }
+              count: { type: integer }
+        revenueSeries:
+          type: array
+          items:
+            type: object
+            required: [date, revenue]
+            properties:
+              date: { type: string }
+              revenue: { type: number }

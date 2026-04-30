@@ -1,4 +1,4 @@
-import { pgTable, serial, text, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, boolean, timestamp, jsonb, integer } from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -13,6 +13,8 @@ export const usersTable = pgTable("users", {
   banned: boolean("banned").notNull().default(false),
   subscriptionTier: text("subscription_tier").notNull().default("free"),
   permissions: jsonb("permissions").$type<string[]>().notNull().default([]),
+  managerId: integer("manager_id"),
+  jobTitle: text("job_title"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   lastActiveAt: timestamp("last_active_at", { withTimezone: true }).notNull().defaultNow(),
 });

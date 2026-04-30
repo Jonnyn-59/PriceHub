@@ -803,7 +803,7 @@ export const AdminGetSellerHistoryResponse = zod.object({
       createdAt: zod.coerce.date(),
     }),
   ),
-  recentActions: zod.array(
+  actions: zod.array(
     zod.object({
       id: zod.number(),
       actorId: zod.number(),
@@ -821,6 +821,138 @@ export const AdminGetSellerHistoryResponse = zod.object({
       units: zod.number(),
       revenue: zod.number(),
       profit: zod.number(),
+    }),
+  ),
+  totals: zod.object({
+    revenue30d: zod.number(),
+    profit30d: zod.number(),
+    orders30d: zod.number(),
+    products: zod.number(),
+  }),
+});
+
+export const ListSellerStaffResponseItem = zod.object({
+  id: zod.number(),
+  hubId: zod.string(),
+  displayName: zod.string(),
+  email: zod.string().nullish(),
+  jobTitle: zod.string().nullable(),
+  role: zod.string(),
+  createdAt: zod.coerce.date(),
+  lastActiveAt: zod.coerce.date().optional(),
+});
+export const ListSellerStaffResponse = zod.array(ListSellerStaffResponseItem);
+
+export const CreateSellerStaffBody = zod.object({
+  hubId: zod.string(),
+  password: zod.string(),
+  displayName: zod.string(),
+  email: zod.string().optional(),
+  jobTitle: zod.string(),
+});
+
+export const CreateSellerStaffResponse = zod.object({
+  id: zod.number(),
+  hubId: zod.string(),
+  displayName: zod.string(),
+  email: zod.string().nullish(),
+  jobTitle: zod.string().nullable(),
+  role: zod.string(),
+  createdAt: zod.coerce.date(),
+  lastActiveAt: zod.coerce.date().optional(),
+});
+
+export const DeleteSellerStaffParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const DeleteSellerStaffResponse = zod.object({
+  ok: zod.boolean(),
+});
+
+export const GetBuyerPriceHistoryParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetBuyerPriceHistoryResponse = zod.object({
+  listingId: zod.number(),
+  name: zod.string(),
+  currency: zod.string(),
+  points: zod.array(
+    zod.object({
+      date: zod.string(),
+      price: zod.number(),
+      marketplace: zod.string(),
+    }),
+  ),
+});
+
+export const GetBuyerSavingsSummaryResponse = zod.object({
+  totals: zod.object({
+    trackedItems: zod.number(),
+    totalSavings: zod.number(),
+    avgSavingsPercent: zod.number(),
+    viewedItems: zod.number(),
+  }),
+  savingsByMarketplace: zod.array(
+    zod.object({
+      marketplace: zod.string(),
+      savings: zod.number(),
+      deals: zod.number(),
+    }),
+  ),
+  recentDeals: zod.array(
+    zod.object({
+      id: zod.number(),
+      name: zod.string(),
+      brand: zod.string().nullish(),
+      description: zod.string().nullish(),
+      category: zod.string(),
+      imageUrl: zod.string(),
+      currency: zod.string(),
+      lowestPrice: zod.number(),
+      highestPrice: zod.number(),
+      savingsPercent: zod.number().optional(),
+      offers: zod.array(
+        zod.object({
+          marketplace: zod.string(),
+          price: zod.number(),
+          url: zod.string(),
+          inStock: zod.boolean(),
+          deliveryDays: zod.number().optional(),
+          rating: zod.number().optional(),
+        }),
+      ),
+    }),
+  ),
+});
+
+export const AdminGetOverviewResponse = zod.object({
+  totals: zod.object({
+    users: zod.number(),
+    sellers: zod.number(),
+    buyers: zod.number(),
+    products: zod.number(),
+    listings: zod.number(),
+    activeSubs: zod.number(),
+    mrr: zod.number(),
+  }),
+  dailySignups: zod.array(
+    zod.object({
+      date: zod.string(),
+      count: zod.number(),
+    }),
+  ),
+  roleBreakdown: zod.array(
+    zod.object({
+      role: zod.string(),
+      count: zod.number(),
+    }),
+  ),
+  revenueSeries: zod.array(
+    zod.object({
+      date: zod.string(),
+      revenue: zod.number(),
     }),
   ),
 });

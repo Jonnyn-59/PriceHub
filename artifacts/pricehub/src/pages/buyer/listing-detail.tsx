@@ -10,8 +10,8 @@ export default function ListingDetail() {
   const [, params] = useRoute("/listing/:id");
   const id = params?.id ? parseInt(params.id, 10) : 0;
 
-  const { data: listing, isLoading } = useGetListing(id, { 
-    query: { enabled: !!id } 
+  const { data: listing, isLoading } = useGetListing(id, {
+    query: { enabled: !!id } as never,
   });
 
   if (isLoading) {

@@ -21,7 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { data: session, isLoading } = useGetCurrentUser({
     query: {
       retry: false,
-    },
+    } as never,
   });
 
   const logoutMutation = useLogoutUser();
