@@ -177,7 +177,7 @@ export default function Dashboard() {
           <Card className={`border-l-4 ${insights.yesterday.sentiment === 'positive' ? 'border-l-emerald-500' : insights.yesterday.sentiment === 'negative' ? 'border-l-rose-500' : 'border-l-primary'}`}>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <div variant="outline" className="font-mono text-xs">Анализ вчерашнего дня</div>
+                <Badge variant="outline" className="font-mono text-xs">Анализ вчерашнего дня</Badge>
                 <Lightbulb className="w-4 h-4 text-muted-foreground" />
               </div>
               <CardTitle className="text-xl mt-2">{insights.yesterday.headline}</CardTitle>
