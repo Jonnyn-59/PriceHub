@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: pricehub-api
+    runtime: node
+    rootDir: .
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter @workspace/api-server run build
+    startCommand: pnpm --filter @workspace/api-server run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "8080"
+      - key: DATABASE_URL
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: SESSION_COOKIE_SAMESITE
+        value: none
+      - key: SESSION_COOKIE_SECURE
+        value: "true"

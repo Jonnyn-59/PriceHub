@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -7,6 +7,7 @@ import {
   useUpdateProfileSettings, 
   useGetPreferences, 
   useUpdatePreferences,
+  useChangePassword,
   getGetProfileSettingsQueryKey,
   getGetPreferencesQueryKey,
   getGetCurrentUserQueryKey
@@ -20,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Loader2, Palette, UserCircle } from "lucide-react";
+import { KeyRound, Loader2, Palette, UserCircle } from "lucide-react";
 
 const profileSchema = z.object({
   displayName: z.string().min(2, "Минимум 2 символа"),
@@ -38,6 +39,17 @@ const prefsSchema = z.object({
   notifications: z.boolean(),
 });
 
+const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Введите текущий пароль"),
+    newPassword: z.string().min(8, "Минимум 8 символов"),
+    confirmPassword: z.string().min(1, "Подтвердите новый пароль"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Пароли не совпадают",
+    path: ["confirmPassword"],
+  });
+
 export default function Settings() {
   const qc = useQueryClient();
   const { data: profile, isLoading: profileLoading } = useGetProfileSettings();
@@ -45,9 +57,35 @@ export default function Settings() {
   
   const updateProfile = useUpdateProfileSettings();
   const updatePrefs = useUpdatePreferences();
+  const changePassword = useChangePassword();
 
   const profileForm = useForm<z.infer<typeof profileSchema>>({ resolver: zodResolver(profileSchema) });
   const prefsForm = useForm<z.infer<typeof prefsSchema>>({ resolver: zodResolver(prefsSchema) });
+  const changePasswordForm = useForm<z.infer<typeof changePasswordSchema>>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
+  const newPassword = changePasswordForm.watch("newPassword");
+
+  const passwordStrength = useMemo(() => {
+    const value = newPassword ?? "";
+    if (!value) return { score: 0, label: "Введите пароль", color: "bg-muted" };
+
+    let score = 0;
+    if (value.length >= 8) score += 1;
+    if (value.length >= 12) score += 1;
+    if (/[a-z]/.test(value) && /[A-Z]/.test(value)) score += 1;
+    if (/\d/.test(value)) score += 1;
+    if (/[^A-Za-z0-9]/.test(value)) score += 1;
+
+    if (score <= 2) return { score, label: "Слабый", color: "bg-destructive" };
+    if (score <= 4) return { score, label: "Средний", color: "bg-yellow-500" };
+    return { score, label: "Сильный", color: "bg-emerald-500" };
+  }, [newPassword]);
 
   useEffect(() => {
     if (profile) {
@@ -111,6 +149,24 @@ export default function Settings() {
     });
   };
 
+  const onChangePasswordSubmit = (data: z.infer<typeof changePasswordSchema>) => {
+    changePassword.mutate(
+      {
+        data: {
+          currentPassword: data.currentPassword,
+          newPassword: data.newPassword,
+        },
+      },
+      {
+        onSuccess: () => {
+          changePasswordForm.reset();
+          toast.success("Пароль успешно обновлен");
+        },
+        onError: (err: any) => toast.error(err.message),
+      },
+    );
+  };
+
   if (profileLoading || prefsLoading) {
     return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
   }
@@ -123,9 +179,10 @@ export default function Settings() {
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+        <TabsList className="grid w-full grid-cols-3 max-w-[560px]">
           <TabsTrigger value="profile"><UserCircle className="w-4 h-4 mr-2" /> Профиль</TabsTrigger>
           <TabsTrigger value="appearance"><Palette className="w-4 h-4 mr-2" /> Внешний вид</TabsTrigger>
+          <TabsTrigger value="security"><KeyRound className="w-4 h-4 mr-2" /> Безопасность</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="mt-6 border border-border rounded-xl p-6 bg-card">
@@ -265,6 +322,50 @@ export default function Settings() {
 
               <Button type="submit" disabled={updatePrefs.isPending}>
                 {updatePrefs.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Применить изменения
+              </Button>
+            </form>
+          </Form>
+        </TabsContent>
+
+        <TabsContent value="security" className="mt-6 border border-border rounded-xl p-6 bg-card">
+          <Form {...changePasswordForm}>
+            <form onSubmit={changePasswordForm.handleSubmit(onChangePasswordSubmit)} className="space-y-6 max-w-xl">
+              <FormField control={changePasswordForm.control} name="currentPassword" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Текущий пароль</FormLabel>
+                  <FormControl><Input type="password" autoComplete="current-password" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+
+              <FormField control={changePasswordForm.control} name="newPassword" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Новый пароль</FormLabel>
+                  <FormControl><Input type="password" autoComplete="new-password" {...field} /></FormControl>
+                  <div className="space-y-2">
+                    <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                      <div
+                        className={`h-full transition-all ${passwordStrength.color}`}
+                        style={{ width: `${Math.max(10, passwordStrength.score * 20)}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">Надежность: {passwordStrength.label}</p>
+                  </div>
+                  <FormDescription>Минимум 8 символов</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )} />
+
+              <FormField control={changePasswordForm.control} name="confirmPassword" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Подтверждение нового пароля</FormLabel>
+                  <FormControl><Input type="password" autoComplete="new-password" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+
+              <Button type="submit" disabled={changePassword.isPending}>
+                {changePassword.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />} Обновить пароль
               </Button>
             </form>
           </Form>
