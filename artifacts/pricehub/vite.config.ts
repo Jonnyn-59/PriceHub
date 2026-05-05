@@ -11,6 +11,7 @@ if (rawPort && (Number.isNaN(port) || port <= 0)) {
 }
 
 const basePath = process.env.BASE_PATH ?? "/";
+const enableReplPlugins = process.env.ENABLE_REPL_PLUGINS === "true";
 
 export default defineConfig({
   base: basePath,
@@ -18,6 +19,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     ...(process.env.NODE_ENV !== "production" &&
+    enableReplPlugins &&
     process.env.REPL_ID !== undefined
       ? [
           await import("@replit/vite-plugin-cartographer").then((m) =>

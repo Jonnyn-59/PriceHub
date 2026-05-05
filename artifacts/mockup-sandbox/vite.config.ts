@@ -12,14 +12,17 @@ if (rawPort && (Number.isNaN(port) || port <= 0)) {
 }
 
 const basePath = process.env.BASE_PATH ?? "/";
+const enableMockupSandbox = process.env.ENABLE_MOCKUP_SANDBOX === "true";
+const enableReplPlugins = process.env.ENABLE_REPL_PLUGINS === "true";
 
 export default defineConfig({
   base: basePath,
   plugins: [
-    mockupPreviewPlugin(),
+    ...(enableMockupSandbox ? [mockupPreviewPlugin()] : []),
     react(),
     tailwindcss(),
     ...(process.env.NODE_ENV !== "production" &&
+    enableReplPlugins &&
     process.env.REPL_ID !== undefined
       ? [
           await import("@replit/vite-plugin-cartographer").then((m) =>

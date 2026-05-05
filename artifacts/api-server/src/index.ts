@@ -16,7 +16,12 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-seed().catch((err) => logger.error({ err }, "Сидинг не удался"));
+const shouldSeed =
+  process.env.SEED_ON_START === "true" && process.env.NODE_ENV !== "production";
+
+if (shouldSeed) {
+  seed().catch((err) => logger.error({ err }, "Сидинг не удался"));
+}
 
 app.listen(port, (err) => {
   if (err) {

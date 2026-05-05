@@ -119,6 +119,25 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </div>
                 <div className="py-4 px-3 overflow-y-auto">
                   <NavLinks />
+                  <div className="mt-4 border-t border-border pt-3">
+                    <Link href="/settings">
+                      <div className="flex items-center px-3 py-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer transition-colors">
+                        <Settings className="w-5 h-5 mr-3" />
+                        <span>Настройки</span>
+                      </div>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        logout();
+                      }}
+                      className="w-full flex items-center px-3 py-2 mt-1 rounded-md text-destructive hover:bg-destructive/10 cursor-pointer transition-colors"
+                    >
+                      <LogOut className="w-5 h-5 mr-3" />
+                      <span>Выйти</span>
+                    </button>
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>
@@ -134,6 +153,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center space-x-4">
             <Button variant="ghost" size="icon" className="text-muted-foreground">
               <Bell className="w-5 h-5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={logout}
+              className="hidden sm:inline-flex"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Выйти
             </Button>
             <div className="flex items-center space-x-3">
               <div className="hidden sm:flex flex-col items-end">

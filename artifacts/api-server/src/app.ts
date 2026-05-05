@@ -8,6 +8,27 @@ import { logger } from "./lib/logger";
 import { pool } from "@workspace/db";
 
 const app: Express = express();
+const isProduction = process.env.NODE_ENV === "production";
+const rawAllowedOrigins = process.env.ALLOWED_ORIGINS ?? "";
+const allowedOrigins = rawAllowedOrigins
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const cookieSameSite =
+  (process.env.SESSION_COOKIE_SAMESITE as "lax" | "strict" | "none" | undefined) ??
+  (isProduction ? "none" : "lax");
+const cookieSecure = isProduction
+  ? process.env.SESSION_COOKIE_SECURE !== "false"
+  : process.env.SESSION_COOKIE_SECURE === "true";
+const sessionSecret = process.env.SESSION_SECRET;
+
+if (isProduction && !sessionSecret) {
+  throw new Error("SESSION_SECRET environment variable is required in production.");
+}
+
+if (cookieSameSite === "none" && !cookieSecure) {
+  throw new Error('SESSION_COOKIE_SECURE must be true when SESSION_COOKIE_SAMESITE is "none".');
+}
 
 const PgSession = connectPgSimple(session);
 
@@ -44,7 +65,29 @@ app.use(
     },
   }),
 );
-app.use(cors({ origin: true, credentials: true }));
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      if (!isProduction) {
+        callback(null, true);
+        return;
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error("CORS origin is not allowed."));
+    },
+    credentials: true,
+  }),
+);
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -55,13 +98,13 @@ app.use(
       tableName: "user_sessions",
       createTableIfMissing: true,
     }),
-    secret: process.env.SESSION_SECRET ?? "dev-secret-change-me",
+    secret: sessionSecret ?? "dev-secret-change-me",
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      sameSite: "lax",
-      secure: false,
+      sameSite: cookieSameSite,
+      secure: cookieSecure,
       maxAge: 30 * 24 * 60 * 60 * 1000,
     },
     name: "pricehub.sid",
