@@ -77,7 +77,7 @@ export default function Home() {
               transition={{ duration: 0.7, delay: 0.1 }}
               className="text-5xl lg:text-7xl font-bold tracking-tight mb-8 leading-tight"
             >
-              Единый терминал для <br />
+              Быстрый мониторинг и анализ цен <br >
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">
                 российского e-commerce
               </span>
